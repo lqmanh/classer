@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='classer',
-    version='0.1dev',
+    version='0.1',
     author='Luong Quang Manh',
     license='MIT',
     install_requires=('Click',),
