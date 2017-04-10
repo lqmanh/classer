@@ -11,9 +11,19 @@ class Classifier:
         self.options = options  # store any additional options
 
     def move_files(self):
-        for root, dirs, files in os.walk(self.src):
-            for file in filter(lambda file: fnmatch.fnmatch(file, self.expr), files):
-                shutil.move(os.path.join(root, file), os.path.join(self.dst, file))
+        def match(file):
+            conditions = (fnmatch.fnmatch(file, self.expr),)
+            return all(conditions)
+
+        if self.options.get('recursive', None):
+            for root, dirs, files in os.walk(self.src):
+                for file in filter(match, files):
+                    shutil.move(os.path.join(root, file), os.path.join(self.dst, file))
+            return
+
+        with os.scandir(self.src) as it:
+            for entry in filter(lambda entry: entry.is_file() and match(entry.name), it):
+                shutil.move(entry.path, os.path.join(self.dst, entry.name))
 
     def clean_dirs(self):
         for root, dirs, files in os.walk(self.src, topdown=False):
