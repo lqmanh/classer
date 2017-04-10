@@ -2,7 +2,7 @@ import click
 from sample.classifier import Classifier
 
 
-@click.group(invoke_without_command=True)
+@click.command()
 @click.argument('expr')
 @click.argument('src', type=click.Path(exists=True))
 @click.argument('dst', type=click.Path())
