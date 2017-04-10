@@ -6,6 +6,7 @@ from sample.classifier import Classifier
 @click.argument('expr')
 @click.argument('src', type=click.Path(exists=True))
 @click.argument('dst', type=click.Path())
-def cli(expr, src, dst):
-    worker = Classifier(expr, src, dst)
+@click.option('--autoclean', '-c', is_flag=True)
+def cli(expr, src, dst, autoclean):
+    worker = Classifier(expr, src, dst, autoclean=autoclean)
     worker.classify()
