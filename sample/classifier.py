@@ -1,6 +1,7 @@
 import shutil
 import os
 import fnmatch
+import pendulum
 
 
 class Classifier:
@@ -10,19 +11,39 @@ class Classifier:
         self.dst = dst
         self.options = options  # store any additional options
 
-    def move_files(self):
-        def match(file):
-            conditions = (fnmatch.fnmatch(file, self.expr),)
-            return all(conditions)
+    def match_name(self, filename):
+        return fnmatch.fnmatch(filename, self.expr)
 
-        if self.options.get('recursive', None):
-            for root, dirs, files in os.walk(self.src):
-                for file in filter(match, files):
-                    shutil.move(os.path.join(root, file), os.path.join(self.dst, file))
-            return
+    def match_time(self, filepath):
+        modified_time = pendulum.from_timestamp(os.path.getmtime(filepath))
 
+        if self.options.get('since'):
+            mintime = pendulum.parse(self.options['since'])
+            if modified_time < mintime:
+                return False
+        if self.options.get('until'):
+            maxtime = pendulum.parse(self.options['until'])
+            if modified_time > maxtime:
+                return False
+        return True
+
+    def match_file(self, root, filename):
+        filepath = os.path.join(root, filename)
+        return all([self.match_name(filename), self.match_time(filepath)])
+
+    def move_recursively(self):
+        for root, dirnames, filenames in os.walk(self.src):
+            filtered = filter(lambda filename: self.match_file(root, filename),
+                              filenames)
+            for filename in filtered:
+                shutil.move(os.path.join(root, filename),
+                            os.path.join(self.dst, filename))
+
+    def move_no_recursively(self):
         with os.scandir(self.src) as it:
-            for entry in filter(lambda entry: entry.is_file() and match(entry.name), it):
+            filtered = filter(lambda entry: self.match_file(*os.path.split(entry.path)),
+                              it)
+            for entry in filtered:
                 shutil.move(entry.path, os.path.join(self.dst, entry.name))
 
     def clean_dirs(self):
@@ -34,6 +55,10 @@ class Classifier:
         # make necessary directories for classified files
         os.makedirs(self.dst, exist_ok=True)
 
-        self.move_files()
-        if self.options.get('autoclean', None):
+        if self.options.get('recursive'):
+            self.move_recursively()
+        else:
+            self.move_no_recursively()
+
+        if self.options.get('autoclean'):
             self.clean_dirs()
