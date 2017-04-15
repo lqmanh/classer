@@ -12,9 +12,15 @@ class Classifier:
         self.options = options  # store any additional options
 
     def match_name(self, filename):
+        '''Return True if the name of the file matchs the glob pattern.'''
+
         return fnmatch.fnmatch(filename, self.expr)
 
     def match_time(self, filepath):
+        '''Return True if the modification time of the file is between some
+        period of time.
+        '''
+
         modified_time = pendulum.from_timestamp(os.path.getmtime(filepath))
 
         if self.options.get('since'):
@@ -28,10 +34,14 @@ class Classifier:
         return True
 
     def match_file(self, root, filename):
+        '''Return True if the file satisfies all conditions.'''
+
         filepath = os.path.join(root, filename)
         return all([self.match_name(filename), self.match_time(filepath)])
 
     def move_recursively(self):
+        '''Move all filtered files to destination directory recursively.'''
+
         for root, dirnames, filenames in os.walk(self.src):
             filtered = filter(lambda filename: self.match_file(root, filename),
                               filenames)
@@ -40,6 +50,8 @@ class Classifier:
                             os.path.join(self.dst, filename))
 
     def move_no_recursively(self):
+        '''Move all filtered files to destination directory non-recursively.'''
+
         with os.scandir(self.src) as it:
             filtered = filter(lambda entry: self.match_file(*os.path.split(entry.path)),
                               it)
@@ -47,11 +59,15 @@ class Classifier:
                 shutil.move(entry.path, os.path.join(self.dst, entry.name))
 
     def clean_dirs(self):
+        '''Removes all empty directories recursively.'''
+
         for root, dirs, files in os.walk(self.src, topdown=False):
             if not dirs and not files:
                 os.removedirs(root)
 
     def classify(self):
+        '''Classify files.'''
+
         # make necessary directories for classified files
         os.makedirs(self.dst, exist_ok=True)
 
