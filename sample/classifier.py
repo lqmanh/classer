@@ -33,11 +33,25 @@ class Classifier:
                 return False
         return True
 
+    def match_size(self, filepath):
+        size = os.path.getsize(filepath)
+
+        if self.options.get('larger'):
+            minsize = self.options['larger']
+            if size < minsize:
+                return False
+        if self.options.get('smaller'):
+            maxsize = self.options['smaller']
+            if size > maxsize:
+                return False
+        return True
+
     def match_file(self, root, filename):
         '''Return True if the file satisfies all conditions.'''
 
         filepath = os.path.join(root, filename)
-        return all([self.match_name(filename), self.match_time(filepath)])
+        return all([self.match_name(filename), self.match_time(filepath),
+                    self.match_size(filepath)])
 
     def move_recursively(self):
         '''Move all filtered files to destination directory recursively.'''

@@ -14,7 +14,10 @@ from sample.classifier import Classifier
               help='Oldest modification time.')
 @click.option('--until',
               help='Latest modification time.')
-def cli(expr, src, dst, autoclean, recursive, since, until):
+@click.option('--larger', type=click.INT)
+@click.option('--smaller', type=click.INT)
+def cli(expr, src, dst, autoclean, recursive, since, until, larger, smaller):
     worker = Classifier(expr, src, dst, autoclean=autoclean,
-                        recursive=recursive, since=since, until=until)
+                        recursive=recursive, since=since, until=until,
+                        larger=larger, smaller=smaller)
     worker.classify()
