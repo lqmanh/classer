@@ -16,8 +16,6 @@ from sample.classifier import Classifier
               help='Latest modification time.')
 @click.option('--larger', type=click.INT)
 @click.option('--smaller', type=click.INT)
-def cli(expr, src, dst, autoclean, recursive, since, until, larger, smaller):
-    worker = Classifier(expr, src, dst, autoclean=autoclean,
-                        recursive=recursive, since=since, until=until,
-                        larger=larger, smaller=smaller)
+def cli(expr, src, dst, **options):
+    worker = Classifier(expr, src, dst, **options)
     worker.classify()

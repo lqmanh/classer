@@ -9,7 +9,7 @@ class Classifier:
         self.expr = expr
         self.src = src
         self.dst = dst
-        self.options = options  # store any additional options
+        self.options = options  # a list of additional options
 
     def match_name(self, filename):
         '''Return True if the name of the file matchs the glob pattern.'''
