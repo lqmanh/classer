@@ -16,6 +16,7 @@ from sample.classifier import Classifier
               help='Latest modification time.')
 @click.option('--larger', type=click.INT)
 @click.option('--smaller', type=click.INT)
+@click.option('--exclude')
 def cli(expr, src, dst, **options):
     worker = Classifier(expr, src, dst, **options)
     worker.classify()

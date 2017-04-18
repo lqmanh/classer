@@ -11,10 +11,10 @@ class Classifier:
         self.dst = dst
         self.options = options  # a list of additional options
 
-    def match_name(self, filename):
-        '''Return True if the name of the file matchs the glob pattern.'''
+    def match_name(self, expr, name):
+        '''Return True if name matchs a glob pattern.'''
 
-        return fnmatch.fnmatch(filename, self.expr)
+        return fnmatch.fnmatch(name, expr)
 
     def match_time(self, filepath):
         '''Return True if the modification time of the file is between some
@@ -50,13 +50,19 @@ class Classifier:
         '''Return True if the file satisfies all conditions.'''
 
         filepath = os.path.join(root, filename)
-        return all([self.match_name(filename), self.match_time(filepath),
-                    self.match_size(filepath)])
+        return all([self.match_name(self.expr, filename),
+                    self.match_time(filepath), self.match_size(filepath)])
 
     def move_recursively(self):
         '''Move all filtered files to destination directory recursively.'''
 
         for root, dirnames, filenames in os.walk(self.src):
+            if self.options.get('exclude'):
+                dirnames[:] = list(
+                    filter(lambda d: not self.match_name(self.options['exclude'], d),
+                           dirnames)
+                )
+
             filtered = filter(lambda filename: self.match_file(root, filename),
                               filenames)
             for filename in filtered:

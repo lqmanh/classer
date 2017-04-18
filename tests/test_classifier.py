@@ -7,8 +7,8 @@ from . import Classifier
 def test_match_name():
     worker = Classifier('*.txt', '.', '.')
 
-    assert worker.match_name('file.txt')
-    assert not worker.match_name('file.py')
+    assert worker.match_name(worker.expr, 'file.txt')
+    assert not worker.match_name(worker.expr, 'file.py')
 
 
 def test_match_time(tmpdir):
@@ -83,6 +83,20 @@ def test_move_rercursively(tmpdir):
     worker.move_recursively()
 
     assert set(os.listdir(resultdir)) == {'file1.py', 'file2.py'}
+
+
+def test_move_recursively_with_exclude(tmpdir):
+    filepath1 = tmpdir.join('file1.py')
+    filepath1.write('')
+    subdir1 = tmpdir.mkdir('subdir1')
+    filepath2 = subdir1.mkdir('subdir2').join('file2.py')
+    filepath2.write('')
+    resultdir = tmpdir.mkdir('result')
+
+    worker = Classifier('*.py', tmpdir, resultdir, exclude='subdir1')
+    worker.move_recursively()
+
+    assert set(os.listdir(resultdir)) == {'file1.py'}
 
 
 def test_move_no_recursively(tmpdir):
