@@ -72,44 +72,35 @@ def test_match_file(tmpdir):
     assert not worker.match_file(tmpdir, 'file4.py')
 
 
-def test_move_rercursively(tmpdir):
-    filepath1 = tmpdir.join('file1.py')
-    filepath1.write('')
-    filepath2 = tmpdir.mkdir('subdir').join('file2.py')
-    filepath2.write('')
-    resultdir = tmpdir.mkdir('result')
-
-    worker = Classifier('*.py', tmpdir, resultdir)
-    worker.move_recursively()
-
-    assert set(os.listdir(resultdir)) == {'file1.py', 'file2.py'}
-
-
-def test_move_recursively_with_exclude(tmpdir):
+def test_filtered_files(tmpdir):
     filepath1 = tmpdir.join('file1.py')
     filepath1.write('')
     subdir1 = tmpdir.mkdir('subdir1')
-    filepath2 = subdir1.mkdir('subdir2').join('file2.py')
-    filepath2.write('')
-    resultdir = tmpdir.mkdir('result')
-
-    worker = Classifier('*.py', tmpdir, resultdir, exclude='subdir1')
-    worker.move_recursively()
-
-    assert set(os.listdir(resultdir)) == {'file1.py'}
-
-
-def test_move_no_recursively(tmpdir):
-    filepath1 = tmpdir.join('file1.py')
-    filepath1.write('')
-    filepath2 = tmpdir.mkdir('subdir').join('file2.py')
+    filepath2 = subdir1.join('file2.py')
     filepath2.write('')
     resultdir = tmpdir.mkdir('result')
 
     worker = Classifier('*.py', tmpdir, resultdir)
-    worker.move_no_recursively()
+    filtered1 = list(worker.filtered_files(recursive=True))
+    filtered2 = list(worker.filtered_files(recursive=False))
 
-    assert set(os.listdir(resultdir)) == {'file1.py'}
+    assert filtered1 == [(filepath1, resultdir.join('file1.py')),
+                         (filepath2, resultdir.join('file2.py'))]
+    assert filtered2 == [(filepath1, resultdir.join('file1.py'))]
+
+
+def test_move_files(tmpdir):
+    filepath1 = tmpdir.join('file1.py')
+    filepath1.write('')
+    subdir1 = tmpdir.mkdir('subdir1')
+    filepath2 = subdir1.join('file2.py')
+    filepath2.write('')
+    resultdir = tmpdir.mkdir('result')
+
+    worker = Classifier('*.py', tmpdir, resultdir, recursive=False)
+    worker.move_files()
+
+    assert os.listdir(resultdir) == ['file1.py']
 
 
 def test_clean_dirs(tmpdir):

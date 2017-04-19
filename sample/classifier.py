@@ -53,9 +53,7 @@ class Classifier:
         return all([self.match_name(self.expr, filename),
                     self.match_time(filepath), self.match_size(filepath)])
 
-    def move_recursively(self):
-        '''Move all filtered files to destination directory recursively.'''
-
+    def filtered_files(self, recursive):
         for root, dirnames, filenames in os.walk(self.src):
             if self.options.get('exclude'):
                 dirnames[:] = list(
@@ -66,17 +64,15 @@ class Classifier:
             filtered = filter(lambda filename: self.match_file(root, filename),
                               filenames)
             for filename in filtered:
-                shutil.move(os.path.join(root, filename),
-                            os.path.join(self.dst, filename))
+                yield os.path.join(root, filename), os.path.join(self.dst, filename)
 
-    def move_no_recursively(self):
-        '''Move all filtered files to destination directory non-recursively.'''
+            if not recursive:
+                return
 
-        with os.scandir(self.src) as it:
-            filtered = filter(lambda entry: self.match_file(*os.path.split(entry.path)),
-                              it)
-            for entry in filtered:
-                shutil.move(entry.path, os.path.join(self.dst, entry.name))
+    def move_files(self):
+        for src, dst in self.filtered_files(self.options.get('recursive')):
+            shutil.move(src, dst)
+            print(f'Moved {src} to {dst}.')
 
     def clean_dirs(self):
         '''Removes all empty directories recursively.'''
@@ -91,10 +87,8 @@ class Classifier:
         # make necessary directories for classified files
         os.makedirs(self.dst, exist_ok=True)
 
-        if self.options.get('recursive'):
-            self.move_recursively()
-        else:
-            self.move_no_recursively()
+        self.move_files()
 
         if self.options.get('autoclean'):
             self.clean_dirs()
+            print('Removed empty directories.')
