@@ -14,9 +14,14 @@ from sample.classifier import Classifier
               help='Oldest modification time.')
 @click.option('--until',
               help='Latest modification time.')
-@click.option('--larger', type=click.INT)
-@click.option('--smaller', type=click.INT)
-@click.option('--exclude')
+@click.option('--larger', type=click.INT,
+              help='Minimum size in bytes.')
+@click.option('--smaller', type=click.INT,
+              help='Maximum size in bytes.')
+@click.option('--exclude',
+              help='Exclude directories with a glob pattern.')
 def cli(expr, src, dst, **options):
+    '''Organize a directory by classifying files into different places.'''
+
     worker = Classifier(expr, src, dst, **options)
     worker.classify()

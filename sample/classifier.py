@@ -34,6 +34,10 @@ class Classifier:
         return True
 
     def match_size(self, filepath):
+        '''Return True if the size of the file is between some amount of volume
+        in bytes.
+        '''
+
         size = os.path.getsize(filepath)
 
         if self.options.get('larger'):
@@ -54,8 +58,11 @@ class Classifier:
                     self.match_time(filepath), self.match_size(filepath)])
 
     def filtered_files(self, recursive):
+        '''Yield filtered files to move.'''
+
         for root, dirnames, filenames in os.walk(self.src):
             if self.options.get('exclude'):
+                # modify dirnames in place
                 dirnames[:] = list(
                     filter(lambda d: not self.match_name(self.options['exclude'], d),
                            dirnames)
@@ -66,10 +73,13 @@ class Classifier:
             for filename in filtered:
                 yield os.path.join(root, filename), os.path.join(self.dst, filename)
 
+            # return at level 1 immediately if not recursive
             if not recursive:
                 return
 
     def move_files(self):
+        '''Move files.'''
+
         for src, dst in self.filtered_files(self.options.get('recursive')):
             shutil.move(src, dst)
             print(f'Moved {src} to {dst}.')
