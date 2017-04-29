@@ -1,20 +1,21 @@
 import shutil
 import os
 import fnmatch
+import hjson as json
 import pendulum
 
 
 class Classifier:
-    def __init__(self, expr, src, dst, **options):
-        self.expr = expr
+    def __init__(self, exprs, src, dst, **options):
+        self.exprs = exprs
         self.src = src
         self.dst = dst
         self.options = options  # a list of additional options
 
-    def match_name(self, expr, name):
-        '''Return True if name matchs a glob pattern.'''
+    def match_name(self, exprs, name):
+        '''Return True if name matchs any of the glob patterns.'''
 
-        return fnmatch.fnmatch(name, expr)
+        return any(fnmatch.fnmatch(name, expr) for expr in exprs)
 
     def match_time(self, filepath):
         '''Return True if the modification time of the file is between some
@@ -54,7 +55,7 @@ class Classifier:
         '''Return True if the file satisfies all conditions.'''
 
         filepath = os.path.join(root, filename)
-        return all([self.match_name(self.expr, filename),
+        return all([self.match_name(self.exprs, filename),
                     self.match_time(filepath), self.match_size(filepath)])
 
     def filtered_files(self, recursive):
@@ -102,3 +103,30 @@ class Classifier:
         if self.options.get('autoclean'):
             self.clean_dirs()
             print('Removed empty directories.')
+
+
+class AutoClassifier:
+    def __init__(self, path):
+        self.path = path
+        self.load_criteria()
+
+    def load_criteria(self):
+        try:
+            with open(self.path) as f:
+                self.criteria = json.load(f)
+        except FileNotFoundError:
+            self.criteria = {}
+
+    def classify(self):
+        targets = self.criteria.pop('targets', {})
+        src = self.criteria.pop('src')
+        top_dst = self.criteria.pop('dst')
+        exclusions = self.criteria.pop('exclusions', {})
+
+        for target in targets:
+            exprs = targets[target]
+            dst = os.path.join(top_dst, target)
+            exclude = exclusions.get(target, [])
+
+            mini_worker = Classifier(exprs, src, dst, exclude=exclude, **self.criteria)
+            mini_worker.classify()
