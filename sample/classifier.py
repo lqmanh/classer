@@ -6,6 +6,8 @@ import pendulum
 
 
 class Classifier:
+    '''Normal classifier.'''
+
     def __init__(self, exprs, src, dst, **options):
         self.exprs = exprs
         self.src = src
@@ -52,11 +54,12 @@ class Classifier:
         return True
 
     def match_file(self, root, filename):
-        '''Return True if the file satisfies all conditions.'''
+        '''Return True if the file satisfies all provided conditions.'''
 
         filepath = os.path.join(root, filename)
         return all([self.match_name(self.exprs, filename),
-                    self.match_time(filepath), self.match_size(filepath)])
+                    self.match_time(filepath),
+                    self.match_size(filepath)])
 
     def filtered_files(self, recursive):
         '''Yield filtered files to move.'''
@@ -106,11 +109,17 @@ class Classifier:
 
 
 class AutoClassifier:
+    '''Automated classifier.'''
+
     def __init__(self, path):
         self.path = path
         self.load_criteria()
 
     def load_criteria(self):
+        '''Loads criteria from json file. If the file fails to load,
+        self.criteria is default to an empty dict.
+        '''
+
         try:
             with open(self.path) as f:
                 self.criteria = json.load(f)
@@ -118,10 +127,15 @@ class AutoClassifier:
             self.criteria = {}
 
     def classify(self):
+        '''Classify files using Classifier instances.'''
+
         targets = self.criteria.pop('targets', {})
+        exclusions = self.criteria.pop('exclusions', {})
+
+        # pop these keys so as not to conflict when passed as additional options
+        # to mini_worker (a Classifier instance)
         src = self.criteria.pop('src')
         top_dst = self.criteria.pop('dst')
-        exclusions = self.criteria.pop('exclusions', {})
 
         for target in targets:
             exprs = targets[target]
