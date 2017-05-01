@@ -2,7 +2,14 @@ import click
 from sample.classifier import Classifier, AutoClassifier
 
 
-@click.group(invoke_without_command=True)
+@click.group()
+def cli():
+    '''Organize a directory by classifying files into different places.'''
+
+    pass
+
+
+@cli.command()
 @click.argument('exprs', nargs=-1)
 @click.argument('src', type=click.Path(exists=True))
 @click.argument('dst', type=click.Path())
@@ -20,8 +27,8 @@ from sample.classifier import Classifier, AutoClassifier
               help='Maximum size in bytes.')
 @click.option('--exclude', '-x', multiple=True,
               help='Glob pattern to exclude directories.')
-def cli(exprs, src, dst, **options):
-    '''Organize a directory by classifying files into different places.'''
+def manuel(exprs, src, dst, **options):
+    '''Manually classify files.'''
 
     worker = Classifier(exprs, src, dst, **options)
     worker.classify()
@@ -30,9 +37,7 @@ def cli(exprs, src, dst, **options):
 @cli.command()
 @click.argument('path', type=click.Path(exists=True))
 def auto(path):
-    '''Automatically classify files based on a preference file.
-    Bypass all other arguments and options.
-    '''
+    '''Automatically classify files based on a criteria file.'''
 
     worker = AutoClassifier(path)
     worker.classify()
