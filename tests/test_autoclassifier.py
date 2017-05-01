@@ -8,7 +8,8 @@ def test_load_criteria(tmpdir):
     filepath = tmpdir.join('file.json')
     filepath.write(json.dumps(data))
 
-    worker = AutoClassifier(filepath)  # load_criteria is executed when initialized
+    worker = AutoClassifier(filepath)
+    # load_criteria is executed when initialized
     assert worker.criteria == data
 
 
@@ -40,7 +41,7 @@ def test_classify(tmpdir):
     filepath3.write('')
 
     worker = AutoClassifier('')
-    # use criteria directly instead of reading from file
+    # use criteria dict directly instead of reading from file
     worker.criteria = criteria
     worker.classify()
 

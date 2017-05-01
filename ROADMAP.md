@@ -8,14 +8,15 @@
 - Size options (larger and smaller)
 - Exclude option
 - Print out operation status
+- Automatically classify files based on a criteria file (subcommand auto)
+- Allow multi glob patterns
 
 ## PLANNED
 - All/directory-only options
-- Automatically classify files based on a cofig file (subcommand auto)
 - Undo the last operation (subcommand undo)
 - Ask/overwrite/rename options with duplicate files
+- Disallow running classer without a command
 
 ## CONSIDERATION
-- Enable multi glob patterns
 - Progressbar
-- Write log files
+- Log files
