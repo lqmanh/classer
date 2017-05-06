@@ -62,7 +62,9 @@ class Classifier:
                     self.match_size(filepath)])
 
     def filtered(self, recursive):
-        '''Yield filtered files to move.'''
+        '''Filter files and yield tuples of source filepath, destination filepath
+        and filename itself.
+        '''
 
         for root, dirnames, filenames in os.walk(self.src):
             if self.options.get('exclude'):
@@ -84,6 +86,8 @@ class Classifier:
                 return
 
     def rename_on_dup(self, src, dst, filename):
+        '''Rename this duplicate then move it.'''
+
         root_dst = dst[:-len(filename)]
         head, _, ext = filename.rpartition('.')
         if not head:
@@ -97,11 +101,15 @@ class Classifier:
         print(f'Moved {src} to {dst}.')
 
     def overwrite_on_dup(self, src, dst, filename):
+        '''Replace the old file with this duplicate.'''
+
         os.remove(dst)
         shutil.move(src, dst)
-        print(f'Overwrote {dst} by {src}.')
+        print(f'Moved {src} to {dst}.')
 
     def act_on_dup(self, src, dst, filename):
+        '''Choose action to do with the duplicate.'''
+
         dup_option = self.options.get('duplicate')
         if dup_option == 'ask':
             print(f'{dst} already exists.')
@@ -117,7 +125,7 @@ class Classifier:
         # do nothing
 
     def move_files(self):
-        '''Move files.'''
+        '''Move filtered files or resolve duplicates.'''
 
         for src, dst, filename in self.filtered(self.options.get('recursive')):
             if os.path.exists(dst):
