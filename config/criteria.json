@@ -35,6 +35,12 @@ This is an example of how the criteria file should look like.
     "smaller": 1024,
 
     /*
+    all ask, rename, overwrite and ignore are duplicate option in general.
+    They are also all possible values of this option.
+    */
+    "duplicate": "rename",
+
+    /*
     Ignore all directories matching any of the glob patterns on the right when
     classifying files to the directory on the left.
     */
