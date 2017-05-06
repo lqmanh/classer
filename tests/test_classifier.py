@@ -72,7 +72,7 @@ def test_match_file(tmpdir):
     assert not worker.match_file(tmpdir, 'file4.py')
 
 
-def test_filtered_files(tmpdir):
+def test_filtered(tmpdir):
     filepath1 = tmpdir.join('file1.py')
     filepath1.write('')
     subdir1 = tmpdir.mkdir('subdir1')
@@ -81,15 +81,15 @@ def test_filtered_files(tmpdir):
     resultdir = tmpdir.mkdir('result')
 
     worker = Classifier(['*.py'], tmpdir, resultdir)
-    filtered1 = list(worker.filtered_files(recursive=True))
-    filtered2 = list(worker.filtered_files(recursive=False))
+    filtered1 = set(worker.filtered(recursive=True))
+    filtered2 = set(worker.filtered(recursive=False))
 
-    assert filtered1 == [(filepath1, resultdir.join('file1.py')),
-                         (filepath2, resultdir.join('file2.py'))]
-    assert filtered2 == [(filepath1, resultdir.join('file1.py'))]
+    assert filtered1 == {(filepath1, resultdir.join('file1.py'), 'file1.py'),
+                         (filepath2, resultdir.join('file2.py'), 'file2.py')}
+    assert filtered2 == {(filepath1, resultdir.join('file1.py'), 'file1.py')}
 
 
-def test_filtered_files_with_exclude(tmpdir):
+def test_filtered_with_exclude(tmpdir):
     filepath1 = tmpdir.join('file1.py')
     filepath1.write('')
     subdir1 = tmpdir.mkdir('subdir1')
@@ -98,9 +98,37 @@ def test_filtered_files_with_exclude(tmpdir):
     resultdir = tmpdir.mkdir('result')
 
     worker = Classifier(['*.py'], tmpdir, resultdir, exclude=['subdir?'])
-    filtered = list(worker.filtered_files(recursive=True))
+    filtered = set(worker.filtered(recursive=True))
 
-    assert filtered == [(filepath1, resultdir.join('file1.py'))]
+    assert filtered == {(filepath1, resultdir.join('file1.py'), 'file1.py')}
+
+
+def test_rename_on_dup(tmpdir):
+    filepath1 = tmpdir.join('file1.py')
+    filepath1.write('')
+    subdir1 = tmpdir.mkdir('subdir1')
+    filepath2 = subdir1.join('file1.py')
+    filepath2.write('')
+
+    worker = Classifier(['*.py'], tmpdir, tmpdir)
+    worker.rename_on_dup(filepath2, str(tmpdir.join('file1.py')), 'file1.py')
+
+    assert set(os.listdir(subdir1)) == set()
+    assert set(os.listdir(tmpdir)) == {'file1.py', 'file1 (2).py', 'subdir1'}
+
+
+def test_overwrite_on_dup(tmpdir):
+    filepath1 = tmpdir.join('file1.py')
+    filepath1.write('')
+    subdir1 = tmpdir.mkdir('subdir1')
+    filepath2 = subdir1.join('file1.py')
+    filepath2.write('')
+
+    worker = Classifier(['*.py'], tmpdir, tmpdir)
+    worker.overwrite_on_dup(filepath2, str(tmpdir.join('file1.py')), 'file1.py')
+
+    assert set(os.listdir(subdir1)) == set()
+    assert set(os.listdir(tmpdir)) == {'file1.py', 'subdir1'}
 
 
 def test_move_files(tmpdir):
@@ -114,7 +142,7 @@ def test_move_files(tmpdir):
     worker = Classifier(['*.py'], tmpdir, resultdir, recursive=False)
     worker.move_files()
 
-    assert os.listdir(resultdir) == ['file1.py']
+    assert set(os.listdir(resultdir)) == {'file1.py'}
 
 
 def test_clean_dirs(tmpdir):
@@ -125,7 +153,7 @@ def test_clean_dirs(tmpdir):
     worker = Classifier(['*.py'], tmpdir, tmpdir)
     worker.clean_dirs()
 
-    assert os.listdir(tmpdir) == ['file.txt']
+    assert set(os.listdir(tmpdir)) == {'file.txt'}
 
 
 def test_classify(tmpdir):
@@ -136,5 +164,5 @@ def test_classify(tmpdir):
                         recursive=True, autoclean=True)
     worker.classify()
 
-    assert os.listdir(tmpdir) == ['result']
-    assert os.listdir(resultdir) == ['file.txt']
+    assert set(os.listdir(tmpdir)) == {'result'}
+    assert set(os.listdir(resultdir)) == {'file.txt'}

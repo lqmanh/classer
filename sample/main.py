@@ -27,6 +27,14 @@ def cli():
               help='Maximum size in bytes.')
 @click.option('--exclude', '-x', multiple=True,
               help='Glob pattern to exclude directories.')
+@click.option('--ask', 'duplicate', flag_value='ask', default=True,
+              help='Ask for action on duplicate.')
+@click.option('--rename', 'duplicate', flag_value='rename',
+              help='Always rename on duplicate.')
+@click.option('--overwrite', 'duplicate', flag_value='overwrite',
+              help='Always overwrite on duplicate.')
+@click.option('--ignore', 'duplicate', flag_value='ignore',
+              help='Always ignore on duplicate.')
 def manuel(exprs, src, dst, **options):
     '''Manually classify files.'''
 
