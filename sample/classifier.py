@@ -10,8 +10,8 @@ class Classifier:
 
     def __init__(self, exprs, src, dst, **options):
         self.exprs = exprs
-        self.src = src
-        self.dst = dst
+        self.src = os.path.abspath(src)
+        self.dst = os.path.abspath(dst)
         self.options = options  # a list of additional options
 
     def match_name(self, exprs, name):
@@ -160,7 +160,7 @@ class AutoClassifier:
     '''Automated classifier.'''
 
     def __init__(self, path):
-        self.path = path
+        self.path = os.path.abspath(path)
         self.load_criteria()
 
     def load_criteria(self):
