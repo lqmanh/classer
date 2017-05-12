@@ -67,6 +67,8 @@ class Classifier:
         '''
 
         for root, dirnames, filenames in os.walk(self.src):
+            if root == self.dst:
+                continue
             if self.options.get('exclude'):
                 # modify dirnames in place
                 dirnames[:] = list(
