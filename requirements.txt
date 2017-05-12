@@ -1,0 +1,11 @@
+appdirs==1.4.3
+click==6.7
+hjson==2.0.2
+packaging==16.8
+pendulum==1.2.0
+pyparsing==2.2.0
+python-dateutil==2.6.0
+pytz==2017.2
+pytzdata==2017.2
+six==1.10.0
+tzlocal==1.4

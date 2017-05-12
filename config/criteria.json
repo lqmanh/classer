@@ -1,0 +1,51 @@
+/*
+This is an example of how the criteria file should look like.
+*NOTE: You should not edit this file directly but use a clone of it instead.
+*/
+{
+    /*
+    Classify all files matching any of the glob patterns on the right to the
+    directory on the left.
+    */
+    "targets": {
+        "Documents": ["*.txt", "*.doc", "*.docx", "*.pdf", "*.epub"],
+        "Music": ["*.mp3", "*.flac", "*.wav"],
+        "Pictures": ["*.jpeg", "*.jpg", "*.png", "*.gif", "*.bmp"],
+        "Videos": ["*.mp4", "*.avi", "*.flv", "*.wmv"],
+    },
+
+    /*
+    Top directory to start classifying files.
+    */
+    "src": ".",
+
+    /*
+    Top directory to save classified files.
+    */
+    "dst": "~",
+
+    /*
+    Any other options available in normal command-line mode.
+    */
+    "autoclean": false,
+    "recursive": true,
+    "since": "2017/01/01",
+    "until": null,
+    "larger": 0,
+    "smaller": 1024,
+
+    /*
+    all ask, rename, overwrite and ignore are duplicate option in general.
+    They are also all possible values of this option.
+    */
+    "duplicate": "rename",
+
+    /*
+    Ignore all directories matching any of the glob patterns on the right when
+    classifying files to the directory on the left.
+    */
+    "exclusions": {
+        "Documents": [],
+        "Music": ["*podcasts"],
+    },
+}
