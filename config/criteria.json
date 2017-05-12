@@ -17,17 +17,17 @@ This is an example of how the criteria file should look like.
     /*
     Top directory to start classifying files.
     */
-    "src": ".",
+    "src": "~/Downloads",
 
     /*
     Top directory to save classified files.
     */
-    "dst": "~",
+    "dst": "~/Downloads",
 
     /*
     Any other options available in normal command-line mode.
     */
-    "autoclean": false,
+    "autoclean": true,
     "recursive": true,
     "since": "2017/01/01",
     "until": null,

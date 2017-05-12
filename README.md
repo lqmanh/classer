@@ -4,84 +4,75 @@
 Organize a directory by classifying files into different places.
 
 
-## USAGE
-Use `--help` for more detail information.
-
+### USAGE
+*Example directory:*
 ```
-$ classer --help
-Usage: classer [OPTIONS] COMMAND [ARGS]...
-
-  Organize a directory by classifying files into different places.
-
-Options:
-  --help  Show this message and exit.
-
-Commands:
-  auto    Automatically classify files based on a...
-  manuel  Manually classify files.
-```
-
-```
-$ classer manuel --help
-Usage: classer manuel [OPTIONS] [EXPRS]... SRC DST
-
-  Manually classify files.
-
-Options:
-  -c, --autoclean                 Automatically remove empty directories.
-  -r, --recursive / -R, --no-recursive
-                                  Recursively/No-recursively scan directories.
-  --since TEXT                    Oldest modification time.
-  --until TEXT                    Latest modification time.
-  --larger INTEGER                Minimum size in bytes.
-  --smaller INTEGER               Maximum size in bytes.
-  -x, --exclude TEXT              Glob pattern to exclude directories.
-  --ask                           Ask for action on duplicate.
-  --rename                        Always rename on duplicate.
-  --overwrite                     Always overwrite on duplicate.
-  --ignore                        Always ignore on duplicate.
-  --help                          Show this message and exit.
+Downloads
+├── a_document.docx
+├── a_draft.txt
+├── a_picture.jpg
+├── a_song.mp3
+├── a_video.mp4
+├── mydocs
+│   ├── a_book.epub
+│   └── a_document.docx
+└── mypodcasts
+    └── a_podcast.wav
 ```
 
-- `EXPRS` -- One or more *glob* pattern as a file filter.
-- `SRC` -- Top directory to start classifying files.
-- `DST` -- Destination directory to save filtered files.
-
-***Examples:***
-```
-$ cd ~/Downloads
-$ classer manuel -c -x NO_TOUCH -x .ignore '*.py' '*.pyc' . ./Python
-```
+##### USING `MANUEL`
+`~$ classer manuel -c '*.docx' '*.epub' Downloads Downloads/Documents`
 
 ```
-$ classer auto --help
-Usage: classer auto [OPTIONS] PATH
-
-  Automatically classify files based on a criteria file.
-
-Options:
-  --help  Show this message and exit.
+Downloads
+├── a_draft.txt
+├── a_picture.jpg
+├── a_song.mp3
+├── a_video.mp4
+├── mypodcasts
+│   └── a_podcast.wav
+└── Documents
+    ├── a_book.epub
+    ├── a_document (2).docx
+    └── a_document.docx
 ```
 
-- `PATH` -- Path to a criteria file.
+##### USING `AUTO`
+`classer$ classer auto ./config/criteria.json`
 
-***Examples:***
 ```
-$ classer auto ~/.config/my_criteria.json
+Downloads
+├── Documents
+│   ├── a_book.epub
+│   ├── a_document (2).docx
+│   ├── a_document.docx
+│   └── a_draft.txt
+├── Music
+│   └── a_song.mp3
+├── mypodcasts
+│   └── a_podcast.wav
+├── Pictures
+│   └── a_picture.jpg
+└── Videos
+    └── a_video.mp4
 ```
 
 
-## NOTES
-
-- Always put quote marks around `EXPRS` so as not to confligs with the system.
-- Criteria file is in *json* format. You can use a clone of the example file in
+### NOTES
+- In command-line mode (aka `manuel` subcommand), always put quote marks around `EXPRS`
+so as not to confligs with the system.
+- Criteria files are in *json* format. It is advisable to use a clone of the file in
 `classer/config/criteria.json`.
-- Because *click* does not support options with infinite values like arguments,
-you must explicitly add as many `-x`/`--exclude` as you need like in the example above.
+- Because *click* does not support options with infinite values like arguments, you
+must explicitly add as many `-x`/`--exclude` as you need.
+*eg:* `classer manuel -x NO_TOUCH -x .ignore '*.txt' . .`
 
 
-## INSTALLATION
+### INSTALLATION
+***Compatible with Python >=3.6***
+
 ```
+$ git clone https://github.com/lqmanh/classer.git
 $ cd classer
 $ pip install -r requirements.txt
 $ pip install .
