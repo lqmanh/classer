@@ -17,22 +17,28 @@ This is an example of how the criteria file should look like.
     /*
     Top directory to start classifying files.
     */
-    "src": ".",
+    "src": "~/Downloads",
 
     /*
     Top directory to save classified files.
     */
-    "dst": "~",
+    "dst": "~/Downloads",
 
     /*
     Any other options available in normal command-line mode.
     */
-    "autoclean": false,
+    "autoclean": true,
     "recursive": true,
     "since": "2017/01/01",
     "until": null,
     "larger": 0,
     "smaller": 1024,
+
+    /*
+    all ask, rename, overwrite and ignore are duplicate option in general.
+    They are also all possible values of this option.
+    */
+    "duplicate": "rename",
 
     /*
     Ignore all directories matching any of the glob patterns on the right when
