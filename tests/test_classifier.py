@@ -183,6 +183,8 @@ def test_clean_dirs(tmpdir):
 
 def test_classify(tmpdir):
     tmpdir.mkdir('subdir').join('file.txt').write('')
+    # join path instead of making resultdir beforehand to test
+    # the ability to make necessary destination directories
     resultdir = tmpdir.join('result')
 
     with open_lastrun_file('w') as f:
