@@ -1,6 +1,7 @@
 import shutil
 import os
 import fnmatch
+import re
 import hjson as json
 import pendulum
 
@@ -8,10 +9,11 @@ import pendulum
 class Classifier:
     '''Normal classifier.'''
 
-    def __init__(self, exprs, src, dst, **options):
+    def __init__(self, exprs, src, dst, lastrun_file, **options):
         self.exprs = exprs
         self.src = os.path.abspath(src)
         self.dst = os.path.abspath(dst)
+        self.lastrun_file = lastrun_file
         self.options = options  # a list of additional options
 
     def match_name(self, exprs, name):
@@ -87,27 +89,32 @@ class Classifier:
             if not recursive:
                 return
 
+    def move_file(self, src, dst):
+        '''Move file.'''
+
+        shutil.move(src, dst)
+        self.lastrun_file.write(f'Moved {src} to {dst}\n')
+        print(f'Moved {src} to {dst}')
+
     def rename_on_dup(self, src, dst, filename):
         '''Rename this duplicate then move it.'''
 
-        root_dst = dst[:-len(filename)]
+        dst_dir = dst[:-len(filename)]
         head, _, ext = filename.rpartition('.')
         if not head:
             head, ext = ext, head
         copy_index = 2  # index of the duplicate
         while os.path.exists(dst):
             filename = head + f' ({copy_index}).' + ext
-            dst = root_dst + filename
+            dst = dst_dir + filename
             copy_index += 1
-        shutil.move(src, dst)
-        print(f'Moved {src} to {dst}.')
+        self.move_file(src, dst)
 
     def overwrite_on_dup(self, src, dst, filename):
         '''Replace the old file with this duplicate.'''
 
         os.remove(dst)
-        shutil.move(src, dst)
-        print(f'Moved {src} to {dst}.')
+        self.move_file(src, dst)
 
     def act_on_dup(self, src, dst, filename):
         '''Choose action to do with the duplicate.'''
@@ -115,7 +122,7 @@ class Classifier:
         dup_option = self.options.get('duplicate')
         if dup_option == 'ask':
             print(f'{dst} already exists.')
-            reply = input('(R)ename, (O)verwrite or (I)gnore? [r/o/i]: ').lower()
+            reply = input('(R)ename, (O)verwrite or (I)gnore? [r/O/I]: ').lower()
         else:
             reply = None
 
@@ -127,14 +134,13 @@ class Classifier:
         # do nothing
 
     def move_files(self):
-        '''Move filtered files or resolve duplicates.'''
+        '''Move filtered files and resolve duplicates.'''
 
         for src, dst, filename in self.filtered(self.options.get('recursive')):
             if os.path.exists(dst):
                 self.act_on_dup(src, dst, filename)
             else:
-                shutil.move(src, dst)
-                print(f'Moved {src} to {dst}.')
+                self.move_file(src, dst)
 
     def clean_dirs(self):
         '''Removes all empty directories recursively.'''
@@ -159,23 +165,25 @@ class Classifier:
 class AutoClassifier:
     '''Automated classifier.'''
 
-    def __init__(self, path):
-        self.path = os.path.abspath(path)
+    def __init__(self, path, lastrun_file):
+        self.criteria_path = os.path.abspath(path)
+        self.lastrun_file = lastrun_file
+
         self.load_criteria()
 
     def load_criteria(self):
-        '''Loads criteria from json file. If the file fails to load,
+        '''Loads criteria from file. If the file fails to load,
         self.criteria is default to an empty dict.
         '''
 
         try:
-            with open(self.path) as f:
+            with open(self.criteria_path) as f:
                 self.criteria = json.load(f)
         except FileNotFoundError:
             self.criteria = {}
 
     def classify(self):
-        '''Classify files using Classifier instances.'''
+        '''Classify files using normal classifiers.'''
 
         targets = self.criteria.pop('targets', {})
         exclusions = self.criteria.pop('exclusions', {})
@@ -190,5 +198,30 @@ class AutoClassifier:
             dst = os.path.join(top_dst, target)
             exclude = exclusions.get(target, [])
 
-            mini_worker = Classifier(exprs, src, dst, exclude=exclude, **self.criteria)
+            mini_worker = Classifier(exprs, src, dst, self.lastrun_file,
+                                     exclude=exclude, **self.criteria)
             mini_worker.classify()
+
+
+class ReverseClassifier:
+    '''Reverse classifier.'''
+
+    def __init__(self, lastrun_file):
+        self.lastrun_file = lastrun_file
+
+    def classify(self):
+        '''Classify files by moving files back to their old paths.'''
+
+        for line in self.lastrun_file:
+            line = line.strip()
+            match = re.fullmatch(r'Moved (.+?) to (.+?)', line)
+            if not match:
+                continue
+            dst = match.group(1)
+            src = match.group(2)
+
+            # make necessary directories for classified files
+            os.makedirs(os.path.split(dst)[0], exist_ok=True)
+
+            shutil.move(src, dst)
+            print(f'Moved {src} back to {dst}')

@@ -1,5 +1,13 @@
 import click
-from sample.classifier import Classifier, AutoClassifier
+from sample.classifier import *
+
+
+def open_lastrun_file(mode='r'):
+    '''Open and return lastrun file.'''
+
+    path = os.path.join(os.path.dirname(os.path.dirname(__file__)),
+                        'data/lastrun.txt')
+    return open(path, mode)
 
 
 @click.group()
@@ -38,8 +46,9 @@ def cli():
 def manuel(exprs, src, dst, **options):
     '''Manually classify files.'''
 
-    worker = Classifier(exprs, src, dst, **options)
-    worker.classify()
+    with open_lastrun_file('w') as f:
+        worker = Classifier(exprs, src, dst, f, **options)
+        worker.classify()
 
 
 @cli.command()
@@ -47,5 +56,18 @@ def manuel(exprs, src, dst, **options):
 def auto(path):
     '''Automatically classify files based on a criteria file.'''
 
-    worker = AutoClassifier(path)
-    worker.classify()
+    with open_lastrun_file('w') as f:
+        worker = AutoClassifier(path, f)
+        worker.classify()
+
+
+@cli.command()
+def undo():
+    '''Undo the last run of classer.'''
+
+    try:
+        with open_lastrun_file('r') as f:
+            worker = ReverseClassifier(f)
+            worker.classify()
+    except FileNotFoundError:
+        print('There is no history')

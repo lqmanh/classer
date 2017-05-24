@@ -1,6 +1,7 @@
 import os
 import hjson as json
 from . import AutoClassifier
+from . import open_lastrun_file
 
 
 def test_load_criteria(tmpdir):
@@ -8,9 +9,10 @@ def test_load_criteria(tmpdir):
     filepath = tmpdir.join('file.json')
     filepath.write(json.dumps(data))
 
-    worker = AutoClassifier(filepath)
-    # load_criteria is executed when initialized
-    assert worker.criteria == data
+    with open_lastrun_file('w') as f:
+        worker = AutoClassifier(filepath, f)
+
+        assert worker.criteria == data
 
 
 def test_classify(tmpdir):
@@ -40,10 +42,11 @@ def test_classify(tmpdir):
     filepath3 = ignore.join('file.md')
     filepath3.write('')
 
-    worker = AutoClassifier('')
-    # use criteria dict directly instead of reading from file
-    worker.criteria = criteria
-    worker.classify()
+    with open_lastrun_file('w') as f:
+        worker = AutoClassifier('no_exist.json', f)
+        # use criteria dict directly instead of reading from file
+        worker.criteria = criteria
+        worker.classify()
 
     assert os.listdir(tmpdir.join('Documents')) == ['file.txt']
     assert os.listdir(tmpdir.join('Music')) == ['file.mp3']
