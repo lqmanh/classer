@@ -112,8 +112,16 @@ def test_filtered_with_exclude(tmpdir):
     assert filtered == {(filepath1, resultdir.join('file1.py'), 'file1.py')}
 
 
-# def test_move_file(tmpdir):
-#     pass
+def test_move_file(tmpdir):
+    filepath = tmpdir.join('file.py')
+    filepath.write('')
+    resultdir = tmpdir.mkdir('result')
+
+    with open_lastrun_file('w') as f:
+        worker = Classifier(['*.py'], tmpdir, tmpdir, f)
+        worker.move_file(filepath, os.path.join(resultdir, 'file.py'))
+
+    assert set(os.listdir(resultdir)) == {'file.py'}
 
 
 def test_rename_on_dup(tmpdir):
@@ -144,10 +152,6 @@ def test_overwrite_on_dup(tmpdir):
 
     assert set(os.listdir(subdir1)) == set()
     assert set(os.listdir(tmpdir)) == {'file1.py', 'subdir1'}
-
-
-# def test_act_on_dup(tmpdir):
-#     pass
 
 
 def test_move_files(tmpdir):

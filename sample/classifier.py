@@ -218,6 +218,8 @@ class ReverseClassifier:
             if not match:
                 continue
             dst = match.group(1)
+            # make necessary directories for classified files
+            os.makedirs(os.path.split(dst)[0], exist_ok=True)
             src = match.group(2)
             shutil.move(src, dst)
             print(f'Moved {src} back to {dst}')

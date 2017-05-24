@@ -65,6 +65,9 @@ def auto(path):
 def undo():
     '''Undo the last run of classer.'''
 
-    with open_lastrun_file('r') as f:
-        worker = ReverseClassifier(f)
-        worker.classify()
+    try:
+        with open_lastrun_file('r') as f:
+            worker = ReverseClassifier(f)
+            worker.classify()
+    except FileNotFoundError:
+        print('There is no history.')
