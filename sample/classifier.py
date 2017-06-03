@@ -90,7 +90,7 @@ class Classifier:
                 return
 
     def move_file(self, src, dst):
-        '''Move file from src to dst.'''
+        '''Move file.'''
 
         shutil.move(src, dst)
         self.lastrun_file.write(f'Moved {src} to {dst}\n')
@@ -134,7 +134,7 @@ class Classifier:
         # do nothing
 
     def move_files(self):
-        '''Move filtered files or resolve duplicates.'''
+        '''Move filtered files and resolve duplicates.'''
 
         for src, dst, filename in self.filtered(self.options.get('recursive')):
             if os.path.exists(dst):
@@ -172,7 +172,7 @@ class AutoClassifier:
         self.load_criteria()
 
     def load_criteria(self):
-        '''Loads criteria from json file. If the file fails to load,
+        '''Loads criteria from file. If the file fails to load,
         self.criteria is default to an empty dict.
         '''
 
@@ -183,7 +183,7 @@ class AutoClassifier:
             self.criteria = {}
 
     def classify(self):
-        '''Classify files using Classifier instances.'''
+        '''Classify files using normal classifiers.'''
 
         targets = self.criteria.pop('targets', {})
         exclusions = self.criteria.pop('exclusions', {})
@@ -210,7 +210,7 @@ class ReverseClassifier:
         self.lastrun_file = lastrun_file
 
     def classify(self):
-        '''Move files back to their old paths.'''
+        '''Classify files by moving files back to their old paths.'''
 
         for line in self.lastrun_file:
             line = line.strip()
@@ -218,8 +218,10 @@ class ReverseClassifier:
             if not match:
                 continue
             dst = match.group(1)
+            src = match.group(2)
+
             # make necessary directories for classified files
             os.makedirs(os.path.split(dst)[0], exist_ok=True)
-            src = match.group(2)
+
             shutil.move(src, dst)
             print(f'Moved {src} back to {dst}')

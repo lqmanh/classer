@@ -70,4 +70,4 @@ def undo():
             worker = ReverseClassifier(f)
             worker.classify()
     except FileNotFoundError:
-        print('There is no history.')
+        print('There is no history')
