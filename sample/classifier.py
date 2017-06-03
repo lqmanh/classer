@@ -148,6 +148,7 @@ class Classifier:
         for root, dirs, files in os.walk(self.src, topdown=False):
             if not dirs and not files:
                 os.removedirs(root)
+        print(f'Removed empty directories in {self.src}')
 
     def classify(self):
         '''Classify files.'''
@@ -159,7 +160,6 @@ class Classifier:
 
         if self.options.get('autoclean'):
             self.clean_dirs()
-            print('Removed empty directories.')
 
 
 class AutoClassifier:
