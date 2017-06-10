@@ -143,11 +143,12 @@ class Classifier:
                 self.move_file(src, dst)
 
     def clean_dirs(self):
-        '''Removes all empty directories recursively.'''
+        '''Removes all empty directories recursively from src.'''
 
         for root, dirs, files in os.walk(self.src, topdown=False):
             if not dirs and not files:
                 os.removedirs(root)
+        print(f'Removed empty directories from {self.src}')
 
     def classify(self):
         '''Classify files.'''
@@ -159,7 +160,6 @@ class Classifier:
 
         if self.options.get('autoclean'):
             self.clean_dirs()
-            print('Removed empty directories.')
 
 
 class AutoClassifier:
@@ -206,22 +206,54 @@ class AutoClassifier:
 class ReverseClassifier:
     '''Reverse classifier.'''
 
-    def __init__(self, lastrun_file):
+    rename_on_dup = Classifier.rename_on_dup
+    overwrite_on_dup = Classifier.overwrite_on_dup
+    act_on_dup = Classifier.act_on_dup
+
+    def __init__(self, lastrun_file, **options):
         self.lastrun_file = lastrun_file
+        self.options = options  # a list of additional options
+
+    def move_file(self, src, dst):
+        '''Move file.'''
+
+        shutil.move(src, dst)
+        print(f'Moved {src} back to {dst}')
+
+    def clean_dirs(self, path):
+        '''Removes all empty directories recursively from path.'''
+
+        try:
+            os.removedirs(path)
+        except OSError:
+            pass
+        else:
+            print(f'Removed empty directories from {path}')
+
+    def move_files(self):
+        '''Move files and resolve duplicates.'''
+
+        for line in self.lastrun_file:
+            match = re.fullmatch(r'Moved (.+?) to (.+?)', line.strip())
+            if not match:
+                continue
+
+            dst = match.group(1)
+            dst_dir, filename = os.path.split(dst)
+            src = match.group(2)
+
+            # make necessary directories for classified files
+            os.makedirs(dst_dir, exist_ok=True)
+
+            if os.path.exists(dst):
+                self.act_on_dup(src, dst, filename)
+            else:
+                self.move_file(src, dst)
+
+            if self.options.get('autoclean'):
+                self.clean_dirs(os.path.split(src)[0])
 
     def classify(self):
         '''Classify files by moving files back to their old paths.'''
 
-        for line in self.lastrun_file:
-            line = line.strip()
-            match = re.fullmatch(r'Moved (.+?) to (.+?)', line)
-            if not match:
-                continue
-            dst = match.group(1)
-            src = match.group(2)
-
-            # make necessary directories for classified files
-            os.makedirs(os.path.split(dst)[0], exist_ok=True)
-
-            shutil.move(src, dst)
-            print(f'Moved {src} back to {dst}')
+        self.move_files()
