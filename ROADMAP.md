@@ -1,7 +1,7 @@
 # ROADMAP
 
 
-## IMPLEMENTED
+### IMPLEMENTED
 - Basic functionalities
 - Autoclean option
 - Recursive/no-recursive option
@@ -13,16 +13,16 @@
 - Allow multi glob patterns
 - Disallow running classer without a subcommand (manuel subcommand)
 - Ask/overwrite/rename/ignore options for duplicate files
-- Undo the last operation (undo subcommand)
-
-
-## PLANNED
-- All/directory-only options
-- Autoclean option for undo subcommand
+- Undo the last run (undo subcommand)
+- Autoclean, ask/overwrite/rename/ignore options for undo subcommand
 - Fix missing data directory bug
-- Improve printed messages
+- Improve messages
 
 
-## CONSIDERATION
+### PLANNED
+- History (instead of only the last operation)
+
+
+### CONSIDERATION
 - Progressbar
 - Log files

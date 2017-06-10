@@ -1,13 +1,6 @@
 import click
 from sample.classifier import *
-
-
-def open_lastrun_file(mode='r'):
-    '''Open and return lastrun file.'''
-
-    path = os.path.join(os.path.dirname(os.path.dirname(__file__)),
-                        'data/lastrun.txt')
-    return open(path, mode)
+from sample.utils import open_lastrun_file
 
 
 @click.group()
@@ -62,12 +55,22 @@ def auto(path):
 
 
 @cli.command()
-def undo():
+@click.option('--autoclean', '-c', is_flag=True,
+              help='Automatically remove empty directories.')
+@click.option('--ask', 'duplicate', flag_value='ask', default=True,
+              help='Ask for action on duplicate.')
+@click.option('--rename', 'duplicate', flag_value='rename',
+              help='Always rename on duplicate.')
+@click.option('--overwrite', 'duplicate', flag_value='overwrite',
+              help='Always overwrite on duplicate.')
+@click.option('--ignore', 'duplicate', flag_value='ignore',
+              help='Always ignore on duplicate.')
+def undo(**options):
     '''Undo the last run of classer.'''
 
     try:
         with open_lastrun_file('r') as f:
-            worker = ReverseClassifier(f)
+            worker = ReverseClassifier(f, **options)
             worker.classify()
     except FileNotFoundError:
         print('There is no history')
