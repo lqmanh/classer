@@ -241,6 +241,7 @@ class ReverseClassifier:
             dst = match.group(1)
             dst_dir, filename = os.path.split(dst)
             src = match.group(2)
+            src_dir = os.path.split(src)[0]
 
             # make necessary directories for classified files
             os.makedirs(dst_dir, exist_ok=True)
@@ -251,7 +252,7 @@ class ReverseClassifier:
                 self.move_file(src, dst)
 
             if self.options.get('autoclean'):
-                self.clean_dirs(os.path.split(src)[0])
+                self.clean_dirs(src_dir)
 
     def classify(self):
         '''Classify files by moving files back to their old paths.'''
