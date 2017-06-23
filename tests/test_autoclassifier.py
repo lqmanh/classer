@@ -1,7 +1,6 @@
 import os
 import hjson as json
-from . import AutoClassifier
-from . import open_lastrun_file
+from . import *
 
 
 def test_load_criteria(tmpdir):
@@ -48,6 +47,6 @@ def test_classify(tmpdir):
         worker.criteria = criteria
         worker.classify()
 
-    assert os.listdir(tmpdir.join('Documents')) == ['file.txt']
-    assert os.listdir(tmpdir.join('Music')) == ['file.mp3']
-    assert os.listdir(tmpdir.join('.ignore')) == ['file.md']
+    assert set(os.listdir(tmpdir.join('Documents'))) == {'file.txt'}
+    assert set(os.listdir(tmpdir.join('Music'))) == {'file.mp3'}
+    assert set(os.listdir(tmpdir.join('.ignore'))) == {'file.md'}

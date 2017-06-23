@@ -1,6 +1,5 @@
 import os
-from . import ReverseClassifier
-from . import open_lastrun_file
+from . import *
 
 
 def test_classify(tmpdir):
@@ -22,4 +21,5 @@ def test_classify(tmpdir):
         worker = ReverseClassifier(f, autoclean=True, duplicate='rename')
         worker.classify()
 
-    assert set(os.listdir(tmpdir)) == {'lastrun.txt', 'file1.md', 'file2.txt', 'file2 (2).txt'}
+    assert set(os.listdir(tmpdir)) == {'lastrun.txt', 'file1.md', 'file2.txt',
+                                       'file2 (2).txt'}

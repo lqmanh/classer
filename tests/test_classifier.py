@@ -1,7 +1,6 @@
 import os
 from pendulum import Pendulum
-from . import Classifier
-from . import open_lastrun_file
+from . import *
 
 
 def test_match_name():
