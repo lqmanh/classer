@@ -1,6 +1,6 @@
 import click
-from sample.classifier import *
-from sample.utils import open_lastrun_file
+from sample.classifiers import *
+from sample.history import History
 
 
 @click.group()
@@ -39,7 +39,9 @@ def cli():
 def manuel(exprs, src, dst, **options):
     '''Manually classify files.'''
 
-    with open_lastrun_file('w') as f:
+    history = History()
+
+    with open(history.new(), 'w') as f:
         worker = Classifier(exprs, src, dst, f, **options)
         worker.classify()
 
@@ -49,7 +51,9 @@ def manuel(exprs, src, dst, **options):
 def auto(path):
     '''Automatically classify files based on a criteria file.'''
 
-    with open_lastrun_file('w') as f:
+    history = History()
+
+    with open(history.new(), 'w') as f:
         worker = AutoClassifier(path, f)
         worker.classify()
 
@@ -68,9 +72,24 @@ def auto(path):
 def undo(**options):
     '''Undo the last run of classer.'''
 
+    history = History()
+    history.update()
+
     try:
-        with open_lastrun_file('r') as f:
+        with open(history.get_latest()) as f:
             worker = ReverseClassifier(f, **options)
             worker.classify()
     except FileNotFoundError:
         print('There is no history')
+
+
+@cli.command()
+def histoire():
+    history = History()
+    history.update()
+
+    for entry in history.get():
+        with open(entry) as f:
+            for line in f:
+                print(line, end='')
+        print()

@@ -13,13 +13,17 @@ def test_classify(tmpdir):
 
     src_dir = os.path.abspath(tmpdir)  # old src dir, new dst dir
     dst_dir = os.path.join(tmpdir, 'subdir')  # old dst dir, new src dir
-    lastrun_path = tmpdir.join('lastrun.txt')
-    lastrun_path.write(f'Moved {src_dir}/file1.md to {dst_dir}/file1.md\n'
-                       f'Moved {src_dir}/file2.txt to {dst_dir}/file2.txt\n')
 
-    with open(lastrun_path) as f:
+    history = History()
+
+    with open(history.new(), 'w') as f:
+        f.write(f'Moved {src_dir}/file1.md to {dst_dir}/file1.md\n'
+                f'Moved {src_dir}/file2.txt to {dst_dir}/file2.txt\n')
+
+    history.update()
+
+    with open(history.get_latest()) as f:
         worker = ReverseClassifier(f, autoclean=True, duplicate='rename')
         worker.classify()
 
-    assert set(os.listdir(tmpdir)) == {'lastrun.txt', 'file1.md', 'file2.txt',
-                                       'file2 (2).txt'}
+    assert set(os.listdir(tmpdir)) == {'file1.md', 'file2.txt', 'file2 (2).txt'}
