@@ -84,12 +84,16 @@ def undo(**options):
 
 
 @cli.command()
-def histoire():
+@click.option('--n', default=0)
+@click.option('--remove', default=1)
+@click.option('--clear', '-c', is_flag=True)
+def histoire(**options):
     history = History()
     history.update()
 
-    for entry in history.get():
-        with open(entry) as f:
-            for line in f:
-                print(line, end='')
-        print()
+    if options.get('remove'):
+        history.remove(options['remove'])
+    elif options.get('clear'):
+        history.clear()
+    else:
+        history.print(options.get('n'))
