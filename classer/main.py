@@ -1,6 +1,6 @@
 import click
-from sample.classifier import *
-from sample.utils import open_lastrun_file
+from classer.classifiers import *
+from classer.history import History
 
 
 @click.group()
@@ -39,7 +39,9 @@ def cli():
 def manuel(exprs, src, dst, **options):
     '''Manually classify files.'''
 
-    with open_lastrun_file('w') as f:
+    history = History()
+
+    with open(history.new(), 'w') as f:
         worker = Classifier(exprs, src, dst, f, **options)
         worker.classify()
 
@@ -49,12 +51,15 @@ def manuel(exprs, src, dst, **options):
 def auto(path):
     '''Automatically classify files based on a criteria file.'''
 
-    with open_lastrun_file('w') as f:
+    history = History()
+
+    with open(history.new(), 'w') as f:
         worker = AutoClassifier(path, f)
         worker.classify()
 
 
 @cli.command()
+@click.otion('--n', default=1)
 @click.option('--autoclean', '-c', is_flag=True,
               help='Automatically remove empty directories.')
 @click.option('--ask', 'duplicate', flag_value='ask', default=True,
@@ -68,9 +73,30 @@ def auto(path):
 def undo(**options):
     '''Undo the last run of classer.'''
 
-    try:
-        with open_lastrun_file('r') as f:
-            worker = ReverseClassifier(f, **options)
-            worker.classify()
-    except FileNotFoundError:
-        print('There is no history')
+    history = History()
+    history.update()
+    entries = list(history.get())
+
+    for i in range(options.pop(n)):
+        try:
+            with open(entries[-i - 1]) as f:
+                worker = ReverseClassifier(f, **options)
+                worker.classify()
+        except IndexError:
+            return
+
+
+@cli.command()
+@click.option('--n', default=0)
+@click.option('--remove', default=1)
+@click.option('--clear', '-c', is_flag=True)
+def histoire(**options):
+    history = History()
+    history.update()
+
+    if options.get('remove'):
+        history.remove(options['remove'])
+    elif options.get('clear'):
+        history.clear()
+    else:
+        history.print(options.get('n'))
