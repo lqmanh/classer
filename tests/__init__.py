@@ -2,6 +2,5 @@ import os
 import sys
 sys.path.append(os.path.abspath(os.path.join('..', os.path.dirname(__file__))))
 
-from sample.classifier import *
-from sample.main import *
-from sample.utils import *
+from classer.classifiers import *
+from classer.history import History

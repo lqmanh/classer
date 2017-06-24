@@ -2,5 +2,3 @@ __pycache__/
 *.egg-info/
 .cache/
 *venv/
-
-lastrun.txt

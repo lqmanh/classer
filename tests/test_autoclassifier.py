@@ -8,7 +8,9 @@ def test_load_criteria(tmpdir):
     filepath = tmpdir.join('file.json')
     filepath.write(json.dumps(data))
 
-    with open_lastrun_file('w') as f:
+    history = History()
+
+    with open(history.new(), 'w') as f:
         worker = AutoClassifier(filepath, f)
 
         assert worker.criteria == data
@@ -41,7 +43,9 @@ def test_classify(tmpdir):
     filepath3 = ignore.join('file.md')
     filepath3.write('')
 
-    with open_lastrun_file('w') as f:
+    history = History()
+
+    with open(history.new(), 'w') as f:
         worker = AutoClassifier('no_exist.json', f)
         # use criteria dict directly instead of reading from file
         worker.criteria = criteria

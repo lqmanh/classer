@@ -4,7 +4,9 @@ from . import *
 
 
 def test_match_name():
-    with open_lastrun_file('w') as f:
+    history = History()
+
+    with open(history.new(), 'w') as f:
         worker = Classifier(['*.txt', '*.md'], '.', '.', f)
 
         assert worker.match_name(worker.exprs, 'file.txt')
@@ -22,7 +24,9 @@ def test_match_time(tmpdir):
     filepath2.write('')
     filepath2.setmtime(Pendulum(2018, 1, 1).timestamp())
 
-    with open_lastrun_file('w') as f:
+    history = History()
+
+    with open(history.new(), 'w') as f:
         worker = Classifier(['*.txt'], tmpdir, tmpdir, f,
                             since='2016-12-31', until='2017-01-02')
 
@@ -40,7 +44,9 @@ def test_match_size(tmpdir):
     with filepath2.open(mode='wb') as f:
         f.truncate(1024)
 
-    with open_lastrun_file('w') as f:
+    history = History()
+
+    with open(history.new(), 'w') as f:
         worker = Classifier(['*.txt'], tmpdir, tmpdir, f,
                             larger=999, smaller=1023)
 
@@ -67,7 +73,9 @@ def test_match_file(tmpdir):
         f.truncate(1025)
     filepath4.setmtime(Pendulum(2017, 1, 1).timestamp())
 
-    with open_lastrun_file('w') as f:
+    history = History()
+
+    with open(history.new(), 'w') as f:
         worker = Classifier(['*.py'], tmpdir, tmpdir, f,
                             since='2016-12-31', until='2017-01-02',
                             smaller=1024)
@@ -85,7 +93,9 @@ def test_filtered(tmpdir):
     filepath2.write('')
     resultdir = tmpdir.mkdir('result')
 
-    with open_lastrun_file('w') as f:
+    history = History()
+
+    with open(history.new(), 'w') as f:
         worker = Classifier(['*.py'], tmpdir, resultdir, f)
         filtered1 = set(worker.filtered(recursive=True))
         filtered2 = set(worker.filtered(recursive=False))
@@ -103,7 +113,9 @@ def test_filtered_with_exclude(tmpdir):
     filepath2.write('')
     resultdir = tmpdir.mkdir('result')
 
-    with open_lastrun_file('w') as f:
+    history = History()
+
+    with open(history.new(), 'w') as f:
         worker = Classifier(['*.py'], tmpdir, resultdir, f,
                             exclude=['subdir?'])
         filtered = set(worker.filtered(recursive=True))
@@ -116,7 +128,9 @@ def test_move_file(tmpdir):
     filepath.write('')
     resultdir = tmpdir.mkdir('result')
 
-    with open_lastrun_file('w') as f:
+    history = History()
+
+    with open(history.new(), 'w') as f:
         worker = Classifier(['*.py'], tmpdir, tmpdir, f)
         worker.move_file(filepath, os.path.join(resultdir, 'file.py'))
 
@@ -130,7 +144,9 @@ def test_rename_on_dup(tmpdir):
     filepath2 = subdir1.join('file1.py')
     filepath2.write('')
 
-    with open_lastrun_file('w') as f:
+    history = History()
+
+    with open(history.new(), 'w') as f:
         worker = Classifier(['*.py'], tmpdir, tmpdir, f)
         worker.rename_on_dup(filepath2, str(tmpdir.join('file1.py')), 'file1.py')
 
@@ -145,7 +161,9 @@ def test_overwrite_on_dup(tmpdir):
     filepath2 = subdir1.join('file1.py')
     filepath2.write('')
 
-    with open_lastrun_file('w') as f:
+    history = History()
+
+    with open(history.new(), 'w') as f:
         worker = Classifier(['*.py'], tmpdir, tmpdir, f)
         worker.overwrite_on_dup(filepath2, str(tmpdir.join('file1.py')), 'file1.py')
 
@@ -161,7 +179,9 @@ def test_move_files(tmpdir):
     filepath2.write('')
     resultdir = tmpdir.mkdir('result')
 
-    with open_lastrun_file('w') as f:
+    history = History()
+
+    with open(history.new(), 'w') as f:
         worker = Classifier(['*.py'], tmpdir, resultdir, f, recursive=False)
         worker.move_files()
 
@@ -173,7 +193,9 @@ def test_clean_dirs(tmpdir):
     tmpdir.mkdir('sub2').mkdir('sub3')
     tmpdir.join('file.txt').write('')
 
-    with open_lastrun_file('w') as f:
+    history = History()
+
+    with open(history.new(), 'w') as f:
         worker = Classifier(['*.py'], tmpdir, tmpdir, f)
         worker.clean_dirs()
 
@@ -186,7 +208,9 @@ def test_classify(tmpdir):
     # the ability to make necessary destination directories
     resultdir = tmpdir.join('result')
 
-    with open_lastrun_file('w') as f:
+    history = History()
+
+    with open(history.new(), 'w') as f:
         worker = Classifier(['*.txt'], tmpdir, resultdir, f,
                             recursive=True, autoclean=True)
         worker.classify()
