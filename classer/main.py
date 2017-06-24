@@ -59,7 +59,7 @@ def auto(path):
 
 
 @cli.command()
-@click.otion('--n', default=1)
+@click.otion('--n', default=1, help='Number of times to undo.')
 @click.option('--autoclean', '-c', is_flag=True,
               help='Automatically remove empty directories.')
 @click.option('--ask', 'duplicate', flag_value='ask', default=True,
@@ -71,7 +71,7 @@ def auto(path):
 @click.option('--ignore', 'duplicate', flag_value='ignore',
               help='Always ignore on duplicate.')
 def undo(**options):
-    '''Undo the last run of classer.'''
+    '''Undo the last run(s).'''
 
     history = History()
     history.update()
@@ -87,10 +87,14 @@ def undo(**options):
 
 
 @cli.command()
-@click.option('--n', default=0)
-@click.option('--remove', default=1)
-@click.option('--clear', '-c', is_flag=True)
+@click.option('--n', default=0, help='Number of the history entries to print.')
+@click.option('--remove', default=1,
+              help='Number of the oldest history entries to remove.')
+@click.option('--clear', '-c', is_flag=True,
+              help='Clear history.')
 def histoire(**options):
+    '''Show information about previous runs.'''
+
     history = History()
     history.update()
 

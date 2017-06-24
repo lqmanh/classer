@@ -13,6 +13,7 @@ def test_update(tmpdir):
 
 def test_get():
     history = History()
+    # the same as the one built with update method
     history.entries = ['file1.txt', 'file2.txt']
 
     assert list(history.entries) == ['file1.txt', 'file2.txt']
@@ -27,6 +28,7 @@ def test_remove(tmpdir):
     filepath3.write('')
 
     history = History(tmpdir)
+    # the same as the one built with update method
     history.entries = [filepath1, filepath2, filepath3]
     history.remove(2)
 
@@ -42,6 +44,7 @@ def test_clear(tmpdir):
     filepath3.write('')
 
     history = History(tmpdir)
+    # the same as the one built with update method
     history.entries = [filepath1, filepath2, filepath3]
     history.clear()
 

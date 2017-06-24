@@ -83,11 +83,12 @@ Downloads
 
 
 ### NOTES
-- Use `--help` option for more detail information.
-- In command-line mode (aka `manuel` subcommand), remember put quote marks around `EXPRS` so as not to confligs with the system.
+- Use `--help` option for more further information.
+- To work with history, use `histoire` command.
+- In command-line mode aka `manuel` command, *ALWAYS* put quote marks around `EXPRS` so as not to confligs with the os.
 - Criteria files are in *json* format. Check out the sample file in `config/sample_criteria.json`.
-- Because *click* does not support options with infinite values like arguments, you must explicitly add as many `-x`/`--exclude` as you need. *eg:* `classer manuel -x NO_TOUCH -x .ignore '*.txt' . .`
-- You can only undo the last run of classer using `manuel` or `auto` with `undo` subcommand.
+- Because *click* does not support options with infinite values like arguments, you must explicitly add as many `-x`/`--exclude` as you need.
+*eg:* `classer manuel -x NO_TOUCH -x .ignore '*.txt' . .`
 
 
 ### INSTALLATION
