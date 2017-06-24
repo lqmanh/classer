@@ -1,6 +1,6 @@
 import click
-from sample.classifiers import *
-from sample.history import History
+from classer.classifiers import *
+from classer.history import History
 
 
 @click.group()
