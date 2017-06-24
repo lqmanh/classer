@@ -59,6 +59,7 @@ def auto(path):
 
 
 @cli.command()
+@click.otion('--n', default=1)
 @click.option('--autoclean', '-c', is_flag=True,
               help='Automatically remove empty directories.')
 @click.option('--ask', 'duplicate', flag_value='ask', default=True,
@@ -74,13 +75,15 @@ def undo(**options):
 
     history = History()
     history.update()
+    entries = list(history.get())
 
-    try:
-        with open(history.get_latest()) as f:
-            worker = ReverseClassifier(f, **options)
-            worker.classify()
-    except FileNotFoundError:
-        print('There is no history')
+    for i in range(options.pop(n)):
+        try:
+            with open(entries[-i - 1]) as f:
+                worker = ReverseClassifier(f, **options)
+                worker.classify()
+        except IndexError:
+            return
 
 
 @cli.command()
