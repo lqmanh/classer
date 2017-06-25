@@ -1,6 +1,6 @@
 import os
 from pendulum import Pendulum
-from . import *
+from classer import Classifier, History
 
 
 def test_match_name():

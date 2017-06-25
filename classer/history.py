@@ -53,15 +53,16 @@ class History:
         than the number of entries, print all.
         '''
 
-        if n <= 0:
+        if n < 1:
             n = len(self.entries)
 
-        count = 0
-        for entry in self.entries[::-1]:
-            self.print_entry(entry)
-            count += 1
-            if count >= n:
-                break
+        for i in range(n):
+            try:
+                self.print_entry(self.entries[-i - 1])
+            except IndexError:
+                return
+            else:
+                print()
 
     def remove(self, n):
         '''Remove n oldest history entries. If n is smaller than 1, do nothing;
