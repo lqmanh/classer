@@ -11,8 +11,8 @@ class Classifier:
 
     def __init__(self, exprs, src, dst, lastrun_file, **options):
         self.exprs = exprs
-        self.src = os.path.abspath(src)
-        self.dst = os.path.abspath(dst)
+        self.src = os.path.expanduser(src)
+        self.dst = os.path.expanduser(dst)
         self.lastrun_file = lastrun_file
         self.options = options  # a list of additional options
 
@@ -166,7 +166,7 @@ class AutoClassifier:
     '''Automated classifier.'''
 
     def __init__(self, path, lastrun_file):
-        self.criteria_path = os.path.abspath(path)
+        self.criteria_path = os.path.expanduser(path)
         self.lastrun_file = lastrun_file
 
         self.load_criteria()
