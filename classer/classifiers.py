@@ -1,7 +1,8 @@
-import shutil
-import os
 import fnmatch
+import os
 import re
+import shutil
+
 import hjson as json
 import pendulum
 

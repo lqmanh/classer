@@ -1,4 +1,5 @@
 import os
+
 import hjson as json
 from classer import AutoClassifier, History
 
