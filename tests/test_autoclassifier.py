@@ -1,6 +1,7 @@
 import os
+
 import hjson as json
-from . import *
+from classer import AutoClassifier, History
 
 
 def test_load_criteria(tmpdir):

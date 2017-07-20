@@ -1,5 +1,6 @@
 import os
-from . import *
+
+from classer import History, ReverseClassifier
 
 
 def test_classify(tmpdir):

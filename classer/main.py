@@ -1,6 +1,5 @@
 import click
-from classer.classifiers import *
-from classer.history import History
+from classer import *
 
 
 @click.group()
@@ -59,7 +58,7 @@ def auto(path):
 
 
 @cli.command()
-@click.otion('--n', default=1, help='Number of times to undo.')
+@click.option('--n', default=1, help='Number of times to undo.')
 @click.option('--autoclean', '-c', is_flag=True,
               help='Automatically remove empty directories.')
 @click.option('--ask', 'duplicate', flag_value='ask', default=True,
@@ -82,13 +81,13 @@ def undo(**options):
             with open(entries[-i - 1]) as f:
                 worker = ReverseClassifier(f, **options)
                 worker.classify()
-        except IndexError:
+        except IndexError:  # only occur when n > len(entries)
             return
 
 
 @cli.command()
 @click.option('--n', default=0, help='Number of the history entries to print.')
-@click.option('--remove', default=1,
+@click.option('--remove', type=click.INT,
               help='Number of the oldest history entries to remove.')
 @click.option('--clear', '-c', is_flag=True,
               help='Clear history.')
