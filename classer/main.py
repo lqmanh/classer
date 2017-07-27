@@ -4,8 +4,7 @@ from classer import *
 
 @click.group()
 def cli():
-    '''Organize a directory by classifying files into different places.'''
-
+    """Organize a directory by classifying files into different places."""
     pass
 
 
@@ -36,8 +35,7 @@ def cli():
 @click.option('--ignore', 'duplicate', flag_value='ignore',
               help='Always ignore on duplicate.')
 def manuel(exprs, src, dst, **options):
-    '''Manually classify files.'''
-
+    """Manually classify files."""
     history = History()
 
     with open(history.new(), 'w') as f:
@@ -48,8 +46,7 @@ def manuel(exprs, src, dst, **options):
 @cli.command()
 @click.argument('path', type=click.Path(exists=True))
 def auto(path):
-    '''Automatically classify files based on a criteria file.'''
-
+    """Automatically classify files based on a criteria file."""
     history = History()
 
     with open(history.new(), 'w') as f:
@@ -70,13 +67,12 @@ def auto(path):
 @click.option('--ignore', 'duplicate', flag_value='ignore',
               help='Always ignore on duplicate.')
 def undo(**options):
-    '''Undo the last run(s).'''
-
+    """Undo the last run(s)."""
     history = History()
     history.update()
     entries = list(history.get())
 
-    for i in range(options.pop(n)):
+    for i in range(options.pop('n')):
         try:
             with open(entries[-i - 1]) as f:
                 worker = ReverseClassifier(f, **options)
@@ -92,8 +88,7 @@ def undo(**options):
 @click.option('--clear', '-c', is_flag=True,
               help='Clear history.')
 def histoire(**options):
-    '''Show information about previous runs.'''
-
+    """Show information about previous runs."""
     history = History()
     history.update()
 
