@@ -1,3 +1,6 @@
+[![Build Status](https://travis-ci.org/lqmanh/classer.svg?branch=releases)](https://travis-ci.org/lqmanh/classer)
+
+
 # classer
 > 'classify' in French
 
@@ -92,7 +95,7 @@ Downloads
 
 
 ### INSTALLATION
-***Compatible with Python >=3.6***
+***Only compatible with Python >= 3.6***
 
 ```
 $ git clone https://github.com/lqmanh/classer.git
