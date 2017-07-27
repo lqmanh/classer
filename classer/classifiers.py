@@ -227,25 +227,28 @@ class ReverseClassifier:
     def move_files(self):
         """Move files and resolve duplicates."""
         for line in self.lastrun_file:
-            match = re.fullmatch(r'Moved (.+?) to (.+?)', line.strip())
+            match = re.fullmatch(r'((Moved)|(Copied)) (.+?) to (.+?)', line.strip())
             if not match:
                 continue
+            action, *_, new_dst, new_src = match.groups()
+            new_dst_dir, filename = os.path.split(new_dst)
+            new_src_dir = os.path.split(new_src)[0]
 
-            dst = match.group(1)
-            dst_dir, filename = os.path.split(dst)
-            src = match.group(2)
-            src_dir = os.path.split(src)[0]
-
-            # make necessary directories for classified files
-            os.makedirs(dst_dir, exist_ok=True)
-
-            if os.path.exists(dst):
-                self.act_on_dup(src, dst, filename)
-            else:
-                self.move_file(src, dst)
+            try:
+                if action == 'Copied':
+                    os.remove(new_src)
+                    continue
+                # make necessary directories for classified files
+                os.makedirs(new_dst_dir, exist_ok=True)
+                if os.path.exists(new_dst):
+                    self.act_on_dup(new_src, new_dst, filename)
+                else:
+                    self.move_file(new_src, new_dst)
+            except FileNotFoundError:
+                continue
 
             if self.options.get('autoclean'):
-                self.clean_dirs(src_dir)
+                self.clean_dirs(new_src_dir)
 
     def classify(self):
         """Classify files by moving files back to their old paths."""

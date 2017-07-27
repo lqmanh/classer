@@ -37,7 +37,7 @@ def test_classify(tmpdir):
     filepath3 = ignore.join('file.md')
     filepath3.write('')
 
-    with open('history', 'w') as f:
+    with open(tmpdir.join('history'), 'w') as f:
         # use criteria dict directly later instead of reading from file when initializing
         worker = AutoClassifier('nosense', f)
         worker.criteria = criteria

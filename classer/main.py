@@ -53,7 +53,7 @@ def auto(path):
 
 
 @cli.command()
-@click.option('--n', default=1, help='Number of times to undo.')
+@click.option('--n', default=1, help='Number of steps to undo.')
 @click.option('--autoclean', '-c', is_flag=True,
               help='Automatically remove empty directories.')
 @click.option('--ask', 'duplicate', flag_value='ask', default=True,
