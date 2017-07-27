@@ -16,14 +16,10 @@ def cli():
               help='Automatically remove empty directories.')
 @click.option('--recursive/--no-recursive', '-r/-R', default=True,
               help='Recursively/No-recursively scan directories.')
-@click.option('--since',
-              help='Oldest modification time.')
-@click.option('--until',
-              help='Latest modification time.')
-@click.option('--larger', type=click.INT,
-              help='Minimum size in bytes.')
-@click.option('--smaller', type=click.INT,
-              help='Maximum size in bytes.')
+@click.option('--since', help='Oldest modification time.')
+@click.option('--until', help='Latest modification time.')
+@click.option('--larger', type=click.INT, help='Minimum size in bytes.')
+@click.option('--smaller', type=click.INT, help='Maximum size in bytes.')
 @click.option('--exclude', '-x', multiple=True,
               help='Glob pattern to exclude directories.')
 @click.option('--ask', 'duplicate', flag_value='ask', default=True,
@@ -34,6 +30,8 @@ def cli():
               help='Always overwrite on duplicate.')
 @click.option('--ignore', 'duplicate', flag_value='ignore',
               help='Always ignore on duplicate.')
+@click.option('--copy', '-C', is_flag=True, default=False,
+              help='Copying instead of moving.')
 def manuel(exprs, src, dst, **options):
     """Manually classify files."""
     history = History()
@@ -55,7 +53,7 @@ def auto(path):
 
 
 @cli.command()
-@click.option('--n', default=1, help='Number of times to undo.')
+@click.option('--n', default=1, help='Number of steps to undo.')
 @click.option('--autoclean', '-c', is_flag=True,
               help='Automatically remove empty directories.')
 @click.option('--ask', 'duplicate', flag_value='ask', default=True,

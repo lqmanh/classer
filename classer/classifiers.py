@@ -88,6 +88,12 @@ class Classifier:
         self.lastrun_file.write(f'Moved {src} to {dst}\n')
         print(f'Moved {src} to {dst}')
 
+    def copy_file(self, src, dst):
+        """Copy file."""
+        shutil.copy2(src, dst)
+        self.lastrun_file.write(f'Copied {src} to {dst}\n')
+        print(f'Copied {src} to {dst}')
+
     def rename_on_dup(self, src, dst, filename):
         """Rename this duplicate then move it."""
         dst_dir = dst[:-len(filename)]
@@ -123,12 +129,17 @@ class Classifier:
         # do nothing
 
     def move_files(self):
-        """Move filtered files and resolve duplicates."""
+        """Move or copy filtered files and resolve duplicates."""
+        if self.options.get('copy'):
+            action = self.copy_file
+        else:
+            action = self.move_file
+
         for src, dst, filename in self.filtered(self.options.get('recursive')):
             if os.path.exists(dst):
                 self.act_on_dup(src, dst, filename)
             else:
-                self.move_file(src, dst)
+                action(src, dst)
 
     def clean_dirs(self):
         """Remove all empty directories recursively from src."""
@@ -216,25 +227,28 @@ class ReverseClassifier:
     def move_files(self):
         """Move files and resolve duplicates."""
         for line in self.lastrun_file:
-            match = re.fullmatch(r'Moved (.+?) to (.+?)', line.strip())
+            match = re.fullmatch(r'((Moved)|(Copied)) (.+?) to (.+?)', line.strip())
             if not match:
                 continue
+            action, *_, new_dst, new_src = match.groups()
+            new_dst_dir, filename = os.path.split(new_dst)
+            new_src_dir = os.path.split(new_src)[0]
 
-            dst = match.group(1)
-            dst_dir, filename = os.path.split(dst)
-            src = match.group(2)
-            src_dir = os.path.split(src)[0]
-
-            # make necessary directories for classified files
-            os.makedirs(dst_dir, exist_ok=True)
-
-            if os.path.exists(dst):
-                self.act_on_dup(src, dst, filename)
-            else:
-                self.move_file(src, dst)
+            try:
+                if action == 'Copied':
+                    os.remove(new_src)
+                    continue
+                # make necessary directories for classified files
+                os.makedirs(new_dst_dir, exist_ok=True)
+                if os.path.exists(new_dst):
+                    self.act_on_dup(new_src, new_dst, filename)
+                else:
+                    self.move_file(new_src, new_dst)
+            except FileNotFoundError:
+                continue
 
             if self.options.get('autoclean'):
-                self.clean_dirs(src_dir)
+                self.clean_dirs(new_src_dir)
 
     def classify(self):
         """Classify files by moving files back to their old paths."""
