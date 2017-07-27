@@ -1,0 +1,32 @@
+language: python
+python:
+    - 3.6
+    - 3.6-dev
+    - 3.7-dev
+    - nightly
+    - pypy3
+
+branches:
+    only:
+        - master
+        - releases
+        - develop
+
+os:
+    - linux
+    - osx
+
+cache: pip
+
+matrix:
+    fast_finish: true
+    allow_failures:
+        - os: osx
+        - python: pypy3
+
+install:
+    - pip install -r requirements.txt
+    - pip install pytest
+
+script:
+    - pytest tests

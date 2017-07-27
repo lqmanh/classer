@@ -1,4 +1,4 @@
-from . import *
+from classer import History
 
 
 def test_update(tmpdir):

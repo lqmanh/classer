@@ -1,6 +1,7 @@
 import os
+
 import hjson as json
-from . import *
+from classer import AutoClassifier, History
 
 
 def test_load_criteria(tmpdir):
@@ -8,12 +9,9 @@ def test_load_criteria(tmpdir):
     filepath = tmpdir.join('file.json')
     filepath.write(json.dumps(data))
 
-    history = History()
+    worker = AutoClassifier(filepath, None)
 
-    with open(history.new(), 'w') as f:
-        worker = AutoClassifier(filepath, f)
-
-        assert worker.criteria == data
+    assert worker.criteria == data
 
 
 def test_classify(tmpdir):
@@ -26,10 +24,6 @@ def test_classify(tmpdir):
         'dst': tmpdir,
         'autoclean': True,
         'recursive': True,
-        'since': None,
-        'until': None,
-        'larger': None,
-        'smaller': None,
         'exclusions': {
             'Documents': ['.ignore']
         }
@@ -43,11 +37,9 @@ def test_classify(tmpdir):
     filepath3 = ignore.join('file.md')
     filepath3.write('')
 
-    history = History()
-
-    with open(history.new(), 'w') as f:
-        worker = AutoClassifier('no_exist.json', f)
-        # use criteria dict directly instead of reading from file
+    with open(tmpdir.join('history'), 'w') as f:
+        # use criteria dict directly later instead of reading from file when initializing
+        worker = AutoClassifier('nosense', f)
         worker.criteria = criteria
         worker.classify()
 

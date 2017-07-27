@@ -1,48 +1,42 @@
-import shutil
-import os
 import fnmatch
+import os
 import re
+import shutil
+
 import hjson as json
 import pendulum
 
 
 class Classifier:
-    '''Normal classifier.'''
+    """Normal classifier."""
 
     def __init__(self, exprs, src, dst, lastrun_file, **options):
         self.exprs = exprs
-        self.src = os.path.abspath(src)
-        self.dst = os.path.abspath(dst)
+        self.src = os.path.expanduser(src)
+        self.dst = os.path.expanduser(dst)
         self.lastrun_file = lastrun_file
         self.options = options  # a list of additional options
 
     def match_name(self, exprs, name):
-        '''Return True if name matchs any of the glob patterns.'''
-
+        """Check if name matchs any of the glob patterns."""
         return any(fnmatch.fnmatch(name, expr) for expr in exprs)
 
     def match_time(self, filepath):
-        '''Return True if the modification time of the file is between some
-        period of time.
-        '''
-
-        modified_time = pendulum.from_timestamp(os.path.getmtime(filepath))
+        """Check if the modification time of the file is between some period of time."""
+        mod_time = pendulum.from_timestamp(os.path.getmtime(filepath))
 
         if self.options.get('since'):
             mintime = pendulum.parse(self.options['since'])
-            if modified_time < mintime:
+            if mod_time < mintime:
                 return False
         if self.options.get('until'):
             maxtime = pendulum.parse(self.options['until'])
-            if modified_time > maxtime:
+            if mod_time > maxtime:
                 return False
         return True
 
     def match_size(self, filepath):
-        '''Return True if the size of the file is between some amount of volume
-        in bytes.
-        '''
-
+        """Check if the size of the file is between some amount of volume in bytes."""
         size = os.path.getsize(filepath)
 
         if self.options.get('larger'):
@@ -56,18 +50,17 @@ class Classifier:
         return True
 
     def match_file(self, root, filename):
-        '''Return True if the file satisfies all provided conditions.'''
-
+        """Check if the file satisfies all provided conditions."""
         filepath = os.path.join(root, filename)
         return all([self.match_name(self.exprs, filename),
                     self.match_time(filepath),
                     self.match_size(filepath)])
 
     def filtered(self, recursive):
-        '''Filter files and yield tuples of source filepath, destination filepath
-        and filename itself.
-        '''
+        """Filter files.
 
+        Yield tuples of source filepath, destination filepath and filename itself.
+        """
         for root, dirnames, filenames in os.walk(self.src):
             if root == self.dst:
                 continue
@@ -90,15 +83,19 @@ class Classifier:
                 return
 
     def move_file(self, src, dst):
-        '''Move file.'''
-
+        """Move file."""
         shutil.move(src, dst)
         self.lastrun_file.write(f'Moved {src} to {dst}\n')
         print(f'Moved {src} to {dst}')
 
-    def rename_on_dup(self, src, dst, filename):
-        '''Rename this duplicate then move it.'''
+    def copy_file(self, src, dst):
+        """Copy file."""
+        shutil.copy2(src, dst)
+        self.lastrun_file.write(f'Copied {src} to {dst}\n')
+        print(f'Copied {src} to {dst}')
 
+    def rename_on_dup(self, src, dst, filename):
+        """Rename this duplicate then move it."""
         dst_dir = dst[:-len(filename)]
         head, _, ext = filename.rpartition('.')
         if not head:
@@ -111,14 +108,12 @@ class Classifier:
         self.move_file(src, dst)
 
     def overwrite_on_dup(self, src, dst, filename):
-        '''Replace the old file with this duplicate.'''
-
+        """Replace the old file with the duplicate."""
         os.remove(dst)
         self.move_file(src, dst)
 
     def act_on_dup(self, src, dst, filename):
-        '''Choose action to do with the duplicate.'''
-
+        """Choose action to do with the duplicate."""
         dup_option = self.options.get('duplicate')
         if dup_option == 'ask':
             print(f'{dst} already exists.')
@@ -134,25 +129,27 @@ class Classifier:
         # do nothing
 
     def move_files(self):
-        '''Move filtered files and resolve duplicates.'''
+        """Move or copy filtered files and resolve duplicates."""
+        if self.options.get('copy'):
+            action = self.copy_file
+        else:
+            action = self.move_file
 
         for src, dst, filename in self.filtered(self.options.get('recursive')):
             if os.path.exists(dst):
                 self.act_on_dup(src, dst, filename)
             else:
-                self.move_file(src, dst)
+                action(src, dst)
 
     def clean_dirs(self):
-        '''Removes all empty directories recursively from src.'''
-
+        """Remove all empty directories recursively from src."""
         for root, dirs, files in os.walk(self.src, topdown=False):
             if not dirs and not files:
                 os.removedirs(root)
         print(f'Removed empty directories from {self.src}')
 
     def classify(self):
-        '''Classify files.'''
-
+        """Classify files."""
         # make necessary directories for classified files
         os.makedirs(self.dst, exist_ok=True)
 
@@ -163,28 +160,27 @@ class Classifier:
 
 
 class AutoClassifier:
-    '''Automated classifier.'''
+    """Automated classifier."""
 
     def __init__(self, path, lastrun_file):
-        self.criteria_path = os.path.abspath(path)
+        self.criteria_path = os.path.expanduser(path)
         self.lastrun_file = lastrun_file
 
-        self.load_criteria()
+        self.criteria = self.load_criteria()
 
     def load_criteria(self):
-        '''Loads criteria from file. If the file fails to load,
-        self.criteria is default to an empty dict.
-        '''
+        """Load criteria from file.
 
+        Return criteria as a dict. If the file fails to load, return an empty dict.
+        """
         try:
             with open(self.criteria_path) as f:
-                self.criteria = json.load(f)
+                return json.load(f)
         except FileNotFoundError:
-            self.criteria = {}
+            return {}
 
     def classify(self):
-        '''Classify files using normal classifiers.'''
-
+        """Classify files using normal classifiers."""
         targets = self.criteria.pop('targets', {})
         exclusions = self.criteria.pop('exclusions', {})
 
@@ -204,7 +200,7 @@ class AutoClassifier:
 
 
 class ReverseClassifier:
-    '''Reverse classifier.'''
+    """Reverse classifier."""
 
     rename_on_dup = Classifier.rename_on_dup
     overwrite_on_dup = Classifier.overwrite_on_dup
@@ -215,14 +211,12 @@ class ReverseClassifier:
         self.options = options  # a list of additional options
 
     def move_file(self, src, dst):
-        '''Move file.'''
-
+        """Move file."""
         shutil.move(src, dst)
         print(f'Moved {src} back to {dst}')
 
     def clean_dirs(self, path):
-        '''Removes all empty directories recursively from path.'''
-
+        """Remove all empty directories recursively from path."""
         try:
             os.removedirs(path)
         except OSError:
@@ -231,30 +225,31 @@ class ReverseClassifier:
             print(f'Removed empty directories from {path}')
 
     def move_files(self):
-        '''Move files and resolve duplicates.'''
-
+        """Move files and resolve duplicates."""
         for line in self.lastrun_file:
-            match = re.fullmatch(r'Moved (.+?) to (.+?)', line.strip())
+            match = re.fullmatch(r'((Moved)|(Copied)) (.+?) to (.+?)', line.strip())
             if not match:
                 continue
+            action, *_, new_dst, new_src = match.groups()
+            new_dst_dir, filename = os.path.split(new_dst)
+            new_src_dir = os.path.split(new_src)[0]
 
-            dst = match.group(1)
-            dst_dir, filename = os.path.split(dst)
-            src = match.group(2)
-            src_dir = os.path.split(src)[0]
-
-            # make necessary directories for classified files
-            os.makedirs(dst_dir, exist_ok=True)
-
-            if os.path.exists(dst):
-                self.act_on_dup(src, dst, filename)
-            else:
-                self.move_file(src, dst)
+            try:
+                if action == 'Copied':
+                    os.remove(new_src)
+                    continue
+                # make necessary directories for classified files
+                os.makedirs(new_dst_dir, exist_ok=True)
+                if os.path.exists(new_dst):
+                    self.act_on_dup(new_src, new_dst, filename)
+                else:
+                    self.move_file(new_src, new_dst)
+            except FileNotFoundError:
+                continue
 
             if self.options.get('autoclean'):
-                self.clean_dirs(src_dir)
+                self.clean_dirs(new_src_dir)
 
     def classify(self):
-        '''Classify files by moving files back to their old paths.'''
-
+        """Classify files by moving files back to their old paths."""
         self.move_files()

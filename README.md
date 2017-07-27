@@ -1,3 +1,6 @@
+[![Build Status](https://travis-ci.org/lqmanh/classer.svg?branch=releases)](https://travis-ci.org/lqmanh/classer)
+
+
 # classer
 > 'classify' in French
 
@@ -85,14 +88,14 @@ Downloads
 ### NOTES
 - Use `--help` option for more further information.
 - To work with history, use `histoire` command.
-- In command-line mode aka `manuel` command, *ALWAYS* put quote marks around `EXPRS` so as not to confligs with the os.
+- In command-line mode aka `manuel` command, *ALWAYS* put quote marks around `EXPRS` so as not to confligs with the OS.
 - Criteria files are in *json* format. Check out the sample file in `config/sample_criteria.json`.
 - Because *click* does not support options with infinite values like arguments, you must explicitly add as many `-x`/`--exclude` as you need.
 *eg:* `classer manuel -x NO_TOUCH -x .ignore '*.txt' . .`
 
 
 ### INSTALLATION
-***Compatible with Python >=3.6***
+***Only compatible with Python >= 3.6***
 
 ```
 $ git clone https://github.com/lqmanh/classer.git
